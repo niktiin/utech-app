@@ -20,9 +20,10 @@ import NavigationComponent from "@/components/NavigationComponent.vue";
 import ImageComponent from "@/components/ImageComponent.vue";
 import TextComponent from "@/components/TextComponent.vue";
 import RadioButtonComponent from "@/components/RadioButtonComponent.vue";
-
+import RadioButtonWrapperMixins from "@/components/mixins/RadioButtonWrapperMixins.js";
 export default {
   name: "IdentificView",
+  mixins: [RadioButtonWrapperMixins],
   components: {
     NavigationComponent,
     ImageComponent,
@@ -31,17 +32,8 @@ export default {
   },
   data: function () {
     return {
-      radioButtonSelectIndex: 0,
       radioButtonLabels: ["Nikita", "Vlad", "Roma"],
     };
-  },
-  methods: {
-    getRadioButtonSelectIndexEqual(selfIndex) {
-      return this.radioButtonSelectIndex == selfIndex;
-    },
-    setRadioButtonSelectIndex(selfIndex) {
-      this.radioButtonSelectIndex = selfIndex;
-    }
   },
 };
 </script>
