@@ -66,7 +66,11 @@ export default new Vuex.Store({
       },
     ],
   },
-  getters: {},
+  getters: {
+    getNavigationComponentLabel: (state) => {
+      return state.navigationComponentData.label;
+    },
+  },
   mutations: {},
   actions: {},
   modules: {},

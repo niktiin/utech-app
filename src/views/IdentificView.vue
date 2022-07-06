@@ -11,7 +11,7 @@
         :label="label"
       />
     </div>
-    <navigation-component />
+    <navigation-component :buttons="navigationComponentButtons" />
   </div>
 </template>
 
@@ -32,9 +32,22 @@ export default {
   },
   data: function () {
     return {
+      navigationComponentButtons: [
+        {
+          label: "back",
+          actionScript: "router.go",
+          props: [-1],
+        },
+        {
+          label: "next",
+          actionScript: "router.push",
+          props: ["main"],
+        },
+      ],
       radioButtonLabels: ["Nikita", "Vlad", "Roma"],
     };
   },
+  methods: {},
 };
 </script>
 
