@@ -4,14 +4,14 @@
     <div class="IdentificView__content">
       <text-component title="title" subtitle="subtitle" />
       <radio-button-component
-        v-for="(label, index) in radioButtonLabels"
+        v-for="(label, index) in getLablesForRadioButton('username')"
         :key="index"
         :isSelect="getRadioButtonSelectIndexEqual(index)"
         @select="setRadioButtonSelectIndex(index)"
         :label="label"
       />
     </div>
-    <navigation-component :buttons="navigationComponentButtons" />
+    <navigation-component :buttons="getNavigationComponentButtons()" />
   </div>
 </template>
 
@@ -44,10 +44,20 @@ export default {
           props: ["main"],
         },
       ],
-      radioButtonLabels: ["Nikita", "Vlad", "Roma"],
     };
   },
-  methods: {},
+  methods: {
+    getLablesForRadioButton(group) {
+      let obj = this.$store.state.formData.find((item) => item.name == group);
+      return obj.variants;
+    },
+    getNavigationComponentButtons() {
+      let value =
+        this.getLablesForRadioButton("username")[this.radioButtonSelectIndex];
+      this.$store.commit("setFormData", { propName: "username", value: value });
+      return this.navigationComponentButtons;
+    },
+  },
 };
 </script>
 
@@ -55,7 +65,7 @@ export default {
 .IdentificView {
   &__content {
     padding: 12px 24px;
-    margin-bottom: 24px;
+    margin-bottom: 56px;
   }
 }
 </style>
