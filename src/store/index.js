@@ -10,7 +10,7 @@ export default new Vuex.Store({
         name: "date",
         entry: "",
         value: "",
-        variants: [],
+        variants: ["Сегодня", "Выбрать другую дату"],
       },
       {
         name: "place",
@@ -75,6 +75,12 @@ export default new Vuex.Store({
   mutations: {
     setFormGroup(state, formGroup) {
       state.formGroup = formGroup;
+    },
+    setFormData(state, data) {
+      let index = state.formData.findIndex(
+        (item) => item.name == data.propName
+      );
+      state.formData[index].value = data.value;
     },
   },
   actions: {},
