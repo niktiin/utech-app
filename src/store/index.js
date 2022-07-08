@@ -65,13 +65,18 @@ export default new Vuex.Store({
         variants: [],
       },
     ],
+    formGroup: [],
   },
   getters: {
     getNavigationComponentLabel: (state) => {
       return state.navigationComponentData.label;
     },
   },
-  mutations: {},
+  mutations: {
+    setFormGroup(state, formGroup) {
+      state.formGroup = formGroup;
+    },
+  },
   actions: {},
   modules: {},
 });

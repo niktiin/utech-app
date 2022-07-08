@@ -55,6 +55,7 @@ export default {
 .IdentificView {
   &__content {
     padding: 12px 24px;
+    margin-bottom: 24px;
   }
 }
 </style>

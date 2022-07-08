@@ -7,30 +7,89 @@
         subtitle="Составте отчет о проделанной
         работе"
       />
-      <div class="form">
-        <h3 class="form__subtitle">Вид работ</h3>
-        <div class="form__radioButtonGroup">
-          <radio-button-component
-            v-for="(label, index) in getLablesForRadioButton('typeOfWork')"
-            :key="index"
-            :isSelect="getRadioButtonSelectIndexEqual(index, 'typeOfWork')"
-            @select="setRadioButtonSelectIndex(index, 'typeOfWork')"
-            :label="label"
-          />
+      <div class="form__group">
+        <div
+          class="form"
+          v-for="(form, formIndex) in formGroup"
+          :key="formIndex"
+        >
+          <div class="form__controlWrapper">
+            <h3 class="form__subtitle">Вид работ</h3>
+            <button
+              class="form__clearButton"
+              @click="removeFormInFormGroup(formIndex)"
+            >
+              x
+            </button>
+          </div>
+          <div class="form__radioButtonGroup">
+            <radio-button-component
+              v-for="(label, radioButtonIndex) in getLablesForRadioButton(
+                'typeOfWork'
+              )"
+              :key="radioButtonIndex"
+              :isSelect="
+                getRadioButtonSelectIndexEqual(
+                  radioButtonIndex,
+                  'typeOfWork',
+                  formIndex
+                )
+              "
+              @select="
+                setRadioButtonSelectIndex(
+                  radioButtonIndex,
+                  'typeOfWork',
+                  formIndex
+                )
+              "
+              :label="label"
+            />
+          </div>
+          <h3 class="form__subtitle">Модель самоката</h3>
+          <div class="form__radioButtonGroup">
+            <radio-button-component
+              v-for="(label, radioButtonIndex) in getLablesForRadioButton(
+                'bikeModel'
+              )"
+              :key="radioButtonIndex"
+              :isSelect="
+                getRadioButtonSelectIndexEqual(
+                  radioButtonIndex,
+                  'bikeModel',
+                  formIndex
+                )
+              "
+              @select="
+                setRadioButtonSelectIndex(
+                  radioButtonIndex,
+                  'bikeModel',
+                  formIndex
+                )
+              "
+              :label="label"
+            />
+          </div>
+          <div class="form__counter">
+            <h3 class="form__subtitle">Количество</h3>
+            <button class="form__counterButton" @click="form.bikeCounter--">
+              -
+            </button>
+            <input
+              type="number"
+              v-model="form.bikeCounter"
+              class="form__counterInput"
+            />
+            <button class="form__counterButton" @click="form.bikeCounter++">
+              +
+            </button>
+          </div>
         </div>
-        <h3 class="form__subtitle">Модель самоката</h3>
-        <div class="form__radioButtonGroup">
-          <radio-button-component
-            v-for="(label, index) in getLablesForRadioButton('bikeModel')"
-            :key="index"
-            :isSelect="getRadioButtonSelectIndexEqual(index, 'bikeModel')"
-            @select="setRadioButtonSelectIndex(index, 'bikeModel')"
-            :label="label"
-          />
-        </div>
+        <button class="MainView__addFormButton" @click="pushFormToFormGroup()">
+          add form
+        </button>
       </div>
     </div>
-    <navigation-component />
+    <navigation-component :buttons="getNavigationComponentButtons()" />
   </div>
 </template>
 
@@ -49,23 +108,62 @@ export default {
   },
   data: function () {
     return {
-      radioButtonGroup: {
-        typeOfWork: {
-          selectIndex: 0,
+      navigationComponentButtons: [
+        {
+          label: "back",
+          actionScript: "router.go",
+          props: [-1],
         },
-        bikeModel: {
-          selectIndex: 0,
+        {
+          label: "next",
+          actionScript: "router.push",
+          props: ["subinfo"],
         },
-      },
-      bikeCounter: 0,
+      ],
+      formGroup: [
+        {
+          radioButtonGroup: {
+            typeOfWork: {
+              selectIndex: 0,
+            },
+            bikeModel: {
+              selectIndex: 0,
+            },
+          },
+          bikeCounter: 0,
+        },
+      ],
     };
   },
   methods: {
-    getRadioButtonSelectIndexEqual(selfIndex, group) {
-      return this.radioButtonGroup[group].selectIndex == selfIndex;
+    getRadioButtonSelectIndexEqual(selfIndex, group, formIndex) {
+      return (
+        this.formGroup[formIndex].radioButtonGroup[group].selectIndex ==
+        selfIndex
+      );
     },
-    setRadioButtonSelectIndex(selfIndex, group) {
-      this.radioButtonGroup[group].selectIndex = selfIndex;
+    getNavigationComponentButtons() {
+      this.$store.commit("setFormGroup", this.formGroup);
+      return this.navigationComponentButtons;
+    },
+    removeFormInFormGroup(index) {
+      this.formGroup.splice(index, 1);
+    },
+    pushFormToFormGroup() {
+      this.formGroup.push({
+        radioButtonGroup: {
+          typeOfWork: {
+            selectIndex: 0,
+          },
+          bikeModel: {
+            selectIndex: 0,
+          },
+        },
+        bikeCounter: 0,
+      });
+    },
+    setRadioButtonSelectIndex(selfIndex, group, formIndex) {
+      this.formGroup[formIndex].radioButtonGroup[group].selectIndex = selfIndex;
     },
     getLablesForRadioButton(group) {
       let obj = this.$store.state.formData.find((item) => item.name == group);
@@ -79,6 +177,46 @@ export default {
 .MainView {
   &__content {
     padding: 12px 24px;
+    margin-bottom: 64px;
+  }
+  &__addFormButton {
+    width: 100%;
+    height: 56px;
+  }
+}
+
+.form {
+  background: #dadada;
+  padding: 8px;
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  &__clearButton {
+    min-width: 56px;
+  }
+  &__controlWrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  &__counter {
+    display: flex;
+    flex-direction: row;
+    margin-top: 16px;
+    .form__subtitle {
+      flex-grow: 1;
+    }
+    &Input {
+      max-width: 56px;
+      text-align: center;
+    }
+    &Button {
+      min-width: 56px;
+    }
   }
 }
 </style>
