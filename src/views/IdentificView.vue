@@ -11,7 +11,10 @@
         :label="label"
       />
     </div>
-    <navigation-component :buttons="getNavigationComponentButtons()" />
+    <navigation-component
+      @clickNextButton="setStoreData()"
+      :buttons="getNavigationComponentButtons()"
+    />
   </div>
 </template>
 
@@ -47,15 +50,20 @@ export default {
     };
   },
   methods: {
+    //  Get labels in store
     getLablesForRadioButton(group) {
       let obj = this.$store.state.formData.find((item) => item.name == group);
       return obj.variants;
     },
+    // Get data to navigation component
     getNavigationComponentButtons() {
+      return this.navigationComponentButtons;
+    },
+    // If form data full, set data in store
+    setStoreData() {
       let value =
         this.getLablesForRadioButton("username")[this.radioButtonSelectIndex];
       this.$store.commit("setFormData", { propName: "username", value: value });
-      return this.navigationComponentButtons;
     },
   },
 };

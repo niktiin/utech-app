@@ -10,14 +10,14 @@
       <div class="form__group">
         <div
           class="form"
-          v-for="(form, formIndex) in formGroup"
+          v-for="(form, formIndex) in GroupOfForm"
           :key="formIndex"
         >
           <div class="form__controlWrapper">
             <h3 class="form__subtitle">Вид работ</h3>
             <button
               class="form__clearButton"
-              @click="removeFormInFormGroup(formIndex)"
+              @click="removeFormInGroupOfForm(formIndex)"
             >
               x
             </button>
@@ -84,12 +84,18 @@
             </button>
           </div>
         </div>
-        <button class="MainView__addFormButton" @click="pushFormToFormGroup()">
+        <button
+          class="MainView__addFormButton"
+          @click="pushFormToGroupOfForm()"
+        >
           add form
         </button>
       </div>
     </div>
-    <navigation-component :buttons="getNavigationComponentButtons()" />
+    <navigation-component
+      @clickNextButton="setStoreData()"
+      :buttons="getNavigationComponentButtons()"
+    />
   </div>
 </template>
 
@@ -120,7 +126,7 @@ export default {
           props: ["subinfo"],
         },
       ],
-      formGroup: [
+      GroupOfForm: [
         {
           radioButtonGroup: {
             typeOfWork: {
@@ -136,21 +142,21 @@ export default {
     };
   },
   methods: {
-    getRadioButtonSelectIndexEqual(selfIndex, group, formIndex) {
-      return (
-        this.formGroup[formIndex].radioButtonGroup[group].selectIndex ==
-        selfIndex
-      );
-    },
+    // Get data to navigation component
     getNavigationComponentButtons() {
-      this.$store.commit("setFormGroup", this.formGroup);
       return this.navigationComponentButtons;
     },
-    removeFormInFormGroup(index) {
-      this.formGroup.splice(index, 1);
+    // If form data full, set data in store
+    setStoreData() {
+      this.$store.commit("setGroupOfForm", this.GroupOfForm);
     },
-    pushFormToFormGroup() {
-      this.formGroup.push({
+    // Remove form
+    removeFormInGroupOfForm(index) {
+      this.GroupOfForm.splice(index, 1);
+    },
+    // Add form
+    pushFormToGroupOfForm() {
+      this.GroupOfForm.push({
         radioButtonGroup: {
           typeOfWork: {
             selectIndex: 0,
@@ -162,9 +168,19 @@ export default {
         bikeCounter: 0,
       });
     },
-    setRadioButtonSelectIndex(selfIndex, group, formIndex) {
-      this.formGroup[formIndex].radioButtonGroup[group].selectIndex = selfIndex;
+    // Return bool value true, if selection button index equal index in data
+    getRadioButtonSelectIndexEqual(selfIndex, group, formIndex) {
+      return (
+        this.GroupOfForm[formIndex].radioButtonGroup[group].selectIndex ==
+        selfIndex
+      );
     },
+    // If select, set index in data
+    setRadioButtonSelectIndex(selfIndex, group, formIndex) {
+      this.GroupOfForm[formIndex].radioButtonGroup[group].selectIndex =
+        selfIndex;
+    },
+    //  Get labels in store
     getLablesForRadioButton(group) {
       let obj = this.$store.state.formData.find((item) => item.name == group);
       return obj.variants;
@@ -177,7 +193,7 @@ export default {
 .MainView {
   &__content {
     padding: 12px 24px;
-    margin-bottom: 64px;
+    margin-bottom: 96px;
   }
   &__addFormButton {
     width: 100%;

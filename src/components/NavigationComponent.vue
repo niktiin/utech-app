@@ -20,6 +20,7 @@ export default {
   name: "NavigationComponent",
   props: ["buttons"],
   methods: {
+    // Select action
     onActionScript(button) {
       switch (button.actionScript) {
         case "router.push":
@@ -33,11 +34,13 @@ export default {
           break;
       }
     },
+    // Emit action on button click
     onActionSecondary() {
       this.onActionScript(this.buttons[0]);
     },
-
+    // Emit action on button click
     onActionPrimary() {
+      this.$emit("clickNextButton");
       this.onActionScript(this.buttons[1]);
     },
   },
