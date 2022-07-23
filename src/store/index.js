@@ -48,24 +48,24 @@ export default new Vuex.Store({
       },
       {
         name: "typeOfWork",
-        entry: "",
+        entry: "entry.1418403925",
         value: "",
         variants: ["ТО", "Ремонт", "Сборка"],
       },
       {
         name: "bikeModel",
-        entry: "",
+        entry: "entry.1225917858",
         value: "",
         variants: ["G30", "AKAI", "MAX PLUS"],
       },
       {
         name: "bikeCount",
-        entry: "",
+        entry: "entry.1989046808",
         value: "",
         variants: [],
       },
     ],
-    formGroup: [],
+    forms: [],
   },
   getters: {
     getNavigationComponentLabel: (state) => {
@@ -73,10 +73,12 @@ export default new Vuex.Store({
     },
   },
   mutations: {
-    setFormGroup(state, formGroup) {
-      state.formGroup = formGroup;
+    AddForm(state, form) {
+      console.log(state.forms);
+      state.forms.push(form);
     },
     setFormData(state, data) {
+      console.log(data);
       let index = state.formData.findIndex(
         (item) => item.name == data.propName
       );

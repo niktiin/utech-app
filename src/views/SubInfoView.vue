@@ -8,9 +8,9 @@
       />
       <div class="SubInfoView__group">
         <h3 class="SubInfoView__subtitle">Выберете дату отчета</h3>
-        <div class="SubInfoView__radioButtongroup">
+        <div class="SubInfoView__radioButtonIndexes">
           <radio-button-component
-            v-for="(label, index) in getLablesForRadioButton('date')"
+            v-for="(label, index) in getLabelsForRadioButton('date')"
             :key="index"
             :isSelect="getRadioButtonSelectIndexEqual(index, 'date')"
             @select="setRadioButtonSelectIndex(index, 'date')"
@@ -20,9 +20,9 @@
       </div>
       <div class="SubInfoView__group">
         <h3 class="SubInfoView__subtitle">Выберете продолжительность смены</h3>
-        <div class="SubInfoView__radioButtongroup">
+        <div class="SubInfoView__radioButtonIndexes">
           <radio-button-component
-            v-for="(label, index) in getLablesForRadioButton('time')"
+            v-for="(label, index) in getLabelsForRadioButton('time')"
             :key="index"
             :isSelect="getRadioButtonSelectIndexEqual(index, 'time')"
             @select="setRadioButtonSelectIndex(index, 'time')"
@@ -32,9 +32,9 @@
       </div>
       <div class="SubInfoView__group">
         <h3 class="SubInfoView__subtitle">Выберете место работы</h3>
-        <div class="SubInfoView__radioButtongroup">
+        <div class="SubInfoView__radioButtonIndexes">
           <radio-button-component
-            v-for="(label, index) in getLablesForRadioButton('place')"
+            v-for="(label, index) in getLabelsForRadioButton('place')"
             :key="index"
             :isSelect="getRadioButtonSelectIndexEqual(index, 'place')"
             @select="setRadioButtonSelectIndex(index, 'place')"
@@ -43,7 +43,10 @@
         </div>
       </div>
     </div>
-    <Navigation-component :buttons="getNavigationComponentButtons()" />
+    <Navigation-component
+      :buttons="getNavigationComponentButtons()"
+      @on-click-button-primary="setStoreProperties()"
+    />
   </div>
 </template>
 
@@ -67,58 +70,78 @@ export default {
           label: "back",
           actionScript: "router.go",
           props: [-1],
+          disabled: false,
+          visible: true,
         },
         {
           label: "next",
           actionScript: "router.push",
           props: ["result"],
+          disabled: true,
+          visible: true,
         },
       ],
-      radioButtonGroup: {
-        date: {
-          selectIndex: 0,
-        },
-        time: {
-          selectIndex: 0,
-        },
-        place: {
-          selectIndex: 0,
-        },
+      radioButtonIndexes: {
+        dateIndex: -1,
+        timeIndex: -1,
+        placeIndex: -1,
       },
     };
   },
   methods: {
+    /** getRadioButtonSelectIndexEqual
+     * @property {number} selfIndex — element index
+     * @property {string} group — group name
+     * @return {bool} — Return result equal select index and self index
+     */
     getRadioButtonSelectIndexEqual(selfIndex, group) {
-      return this.radioButtonGroup[group].selectIndex == selfIndex;
+      return this.radioButtonIndexes[group + "Index"] == selfIndex;
     },
+    /** setRadioButtonSelectIndex — before click on button, set select index
+     * @property {number} selfIndex — Element index
+     * @property {string} group — Group name
+     * @property {number} formIndex — Form index
+     */
     setRadioButtonSelectIndex(selfIndex, group) {
-      this.radioButtonGroup[group].selectIndex = selfIndex;
+      this.radioButtonIndexes[group + "Index"] = selfIndex;
     },
-    getLablesForRadioButton(group) {
+    /**
+     * getLabelsForRadioButton — Return labels
+     * @property {string} formDataGroupName — Group name
+     * @return {object} — Return property group
+     */
+    getLabelsForRadioButton(group) {
       let obj = this.$store.state.formData.find((item) => item.name == group);
       return obj.variants;
     },
+    /** getNavigationComponentButtons — handle navigation
+     * property,set 'next' button active if every radio button is select
+     * @return {object} — return properties group for NavigationComponent
+     */
     getNavigationComponentButtons() {
-      let dateValue =
-        this.getLablesForRadioButton("date")[
-          this.radioButtonGroup.date.selectIndex
-        ];
-      this.$store.commit("setFormData", { propName: "date", value: dateValue });
-      let timeValue =
-        this.getLablesForRadioButton("time")[
-          this.radioButtonGroup.date.selectIndex
-        ];
-      this.$store.commit("setFormData", { propName: "time", value: timeValue });
-      let placeValue =
-        this.getLablesForRadioButton("place")[
-          this.radioButtonGroup.date.selectIndex
-        ];
-      this.$store.commit("setFormData", {
-        propName: "place",
-        value: placeValue,
-      });
+      let nav = this.navigationComponentButtons;
+      let rbi = this.radioButtonIndexes;
+      if (rbi.dateIndex > -1 && rbi.timeIndex > -1 && rbi.placeIndex > -1) {
+        nav[1].disabled = false;
+      }
+      return nav;
+    },
 
-      return this.navigationComponentButtons;
+    /** setStoreProperties
+     * @function commit — parse property index to label and commit value
+     */
+    setStoreProperties() {
+      let commit = (groupName) => {
+        let labels = this.getLabelsForRadioButton(groupName);
+        let value = labels[this.radioButtonIndexes[groupName + "Index"]];
+        this.$store.commit("setFormData", {
+          propName: groupName,
+          value: value,
+        });
+      };
+      commit("date");
+      commit("time");
+      commit("place");
     },
   },
 };

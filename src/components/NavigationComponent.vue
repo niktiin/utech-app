@@ -2,13 +2,17 @@
   <div class="NavigationComponent">
     <button
       class="NavigationComponent__button_action_secondary"
-      @click="onActionSecondary()"
+      @click="onClickButtonSecondary()"
+      :disabled="buttons[0].disabled"
+      v-show="buttons[0].visible"
     >
       {{ buttons[0].label }}
     </button>
     <button
       class="NavigationComponent__button_action_primary"
-      @click="onActionPrimary()"
+      @click="onClickButtonPrimary()"
+      :disabled="buttons[1].disabled"
+      v-show="buttons[1].visible"
     >
       {{ buttons[1].label }}
     </button>
@@ -17,10 +21,17 @@
 
 <script>
 export default {
+  /**
+   * @module NavigationComponent
+   * @property {object} buttons label & actionType & properties for buttons
+   */
   name: "NavigationComponent",
   props: ["buttons"],
   methods: {
-    onActionScript(button) {
+    /** Handle actions
+     * @param {object} button label & actionType & properties
+     */
+    actionHandler(button) {
       switch (button.actionScript) {
         case "router.push":
           this.$router.push(button.props[0]);
@@ -30,15 +41,19 @@ export default {
           break;
 
         default:
+          // TODO: Add redirect to error page
           break;
       }
     },
-    onActionSecondary() {
-      this.onActionScript(this.buttons[0]);
+    /** Do action in actionHandler() before click on secondary button*/
+    onClickButtonSecondary() {
+      this.actionHandler(this.buttons[0]);
+      this.$emit("onClickButtonSecondary");
     },
-
-    onActionPrimary() {
-      this.onActionScript(this.buttons[1]);
+    /** Do action in actionHandler() before click on primary button */
+    onClickButtonPrimary() {
+      this.actionHandler(this.buttons[1]);
+      this.$emit("on-click-button-primary");
     },
   },
 };

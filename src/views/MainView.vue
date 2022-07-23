@@ -7,24 +7,21 @@
         subtitle="Составте отчет о проделанной
         работе"
       />
+
       <div class="form__group">
-        <div
-          class="form"
-          v-for="(form, formIndex) in formGroup"
-          :key="formIndex"
-        >
+        <div class="form" v-for="(form, formIndex) in forms" :key="formIndex">
           <div class="form__controlWrapper">
             <h3 class="form__subtitle">Вид работ</h3>
             <button
               class="form__clearButton"
-              @click="removeFormInFormGroup(formIndex)"
+              @click="removeFormInforms(formIndex)"
             >
               x
             </button>
           </div>
           <div class="form__radioButtonGroup">
             <radio-button-component
-              v-for="(label, radioButtonIndex) in getLablesForRadioButton(
+              v-for="(label, radioButtonIndex) in getLabelsForRadioButton(
                 'typeOfWork'
               )"
               :key="radioButtonIndex"
@@ -48,7 +45,7 @@
           <h3 class="form__subtitle">Модель самоката</h3>
           <div class="form__radioButtonGroup">
             <radio-button-component
-              v-for="(label, radioButtonIndex) in getLablesForRadioButton(
+              v-for="(label, radioButtonIndex) in getLabelsForRadioButton(
                 'bikeModel'
               )"
               :key="radioButtonIndex"
@@ -71,25 +68,28 @@
           </div>
           <div class="form__counter">
             <h3 class="form__subtitle">Количество</h3>
-            <button class="form__counterButton" @click="form.bikeCounter--">
+            <button class="form__counterButton" @click="form.bikeCount--">
               -
             </button>
             <input
               type="number"
-              v-model="form.bikeCounter"
+              v-model="form.bikeCount"
               class="form__counterInput"
             />
-            <button class="form__counterButton" @click="form.bikeCounter++">
+            <button class="form__counterButton" @click="form.bikeCount++">
               +
             </button>
           </div>
         </div>
-        <button class="MainView__addFormButton" @click="pushFormToFormGroup()">
+        <button class="MainView__addFormButton" @click="pushFormToforms()">
           add form
         </button>
       </div>
     </div>
-    <navigation-component :buttons="getNavigationComponentButtons()" />
+    <navigation-component
+      :buttons="getNavigationComponentButtons()"
+      @on-click-button-primary="setStoreProperties()"
+    />
   </div>
 </template>
 
@@ -113,61 +113,102 @@ export default {
           label: "back",
           actionScript: "router.go",
           props: [-1],
+          disabled: false,
+          visible: true,
         },
         {
           label: "next",
           actionScript: "router.push",
           props: ["subinfo"],
+          disabled: true,
+          visible: true,
         },
       ],
-      formGroup: [
+      forms: [
         {
-          radioButtonGroup: {
-            typeOfWork: {
-              selectIndex: 0,
-            },
-            bikeModel: {
-              selectIndex: 0,
-            },
-          },
-          bikeCounter: 0,
+          typeOfWorkIndex: 0,
+          bikeModelIndex: 0,
+          bikeCount: 0,
         },
       ],
     };
   },
   methods: {
+    /** getRadioButtonSelectIndexEqual
+     * @property {number} selfIndex — element index
+     * @property {string} group — group name
+     * @property {number} formIndex — form index in array
+     * @return {bool} — Return result equal select index and self index
+     */
     getRadioButtonSelectIndexEqual(selfIndex, group, formIndex) {
-      return (
-        this.formGroup[formIndex].radioButtonGroup[group].selectIndex ==
-        selfIndex
-      );
+      return this.forms[formIndex][group + "Index"] == selfIndex;
     },
+    /** setRadioButtonSelectIndex — before click on button, set select index
+     * @property {number} selfIndex — Element index
+     * @property {string} group — Group name
+     * @property {number} formIndex — Form index
+     */
+    setRadioButtonSelectIndex(selfIndex, group, formIndex) {
+      this.forms[formIndex][group + "Index"] = selfIndex;
+    },
+    /** getNavigationComponentButtons — handle navigation
+     * property,set 'next' button active if every radio button in every form is select
+     * @return {object} — return properties group for NavigationComponent
+     */
     getNavigationComponentButtons() {
-      this.$store.commit("setFormGroup", this.formGroup);
-      return this.navigationComponentButtons;
+      let nav = this.navigationComponentButtons;
+      let result = this.forms.every((item) => {
+        return (
+          item.bikeCount > 0 &&
+          item.typeOfWorkIndex > -1 &&
+          item.bikeModelIndex > -1
+        );
+      });
+      if (result) {
+        nav[1].disabled = false;
+      }
+      return nav;
     },
-    removeFormInFormGroup(index) {
-      this.formGroup.splice(index, 1);
+    /** removeFormInforms — Remove element in array
+     * @property {number} index — Element index
+     */
+    removeFormInforms(index) {
+      this.forms.splice(index, 1);
     },
-    pushFormToFormGroup() {
-      this.formGroup.push({
-        radioButtonGroup: {
-          typeOfWork: {
-            selectIndex: 0,
-          },
-          bikeModel: {
-            selectIndex: 0,
-          },
-        },
-        bikeCounter: 0,
+    /** pushFormToforms — Add new form in array */
+    pushFormToforms() {
+      this.forms.push({
+        typeOfWorkIndex: -1,
+        bikeModelIndex: -1,
+        bikeCount: 0,
       });
     },
-    setRadioButtonSelectIndex(selfIndex, group, formIndex) {
-      this.formGroup[formIndex].radioButtonGroup[group].selectIndex = selfIndex;
-    },
-    getLablesForRadioButton(group) {
-      let obj = this.$store.state.formData.find((item) => item.name == group);
+    /**
+     * getLabelsForRadioButton — Return labels
+     * @property {string} formDataGroupName — Group name
+     * @return {object} — Return property group
+     */
+    getLabelsForRadioButton(formDataGroupName) {
+      let obj = this.$store.state.formData.find(
+        (item) => item.name == formDataGroupName
+      );
       return obj.variants;
+    },
+
+    /** setStoreProperties — Set properties in store
+     * @type {string} value — form properties before parse
+     */
+    setStoreProperties() {
+      this.forms.forEach((item) => {
+        let value = {
+          bikeCount: item.bikeCount,
+          typeOfWork:
+            this.getLabelsForRadioButton("typeOfWork")[item.typeOfWorkIndex],
+          bikeModel:
+            this.getLabelsForRadioButton("bikeModel")[item.bikeModelIndex],
+        };
+        this.$store.commit("AddForm", value);
+      });
     },
   },
 };

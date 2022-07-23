@@ -9,7 +9,9 @@
       >radio_button_unchecked</span
     >
     <span class="RadioButtonComponent__label">{{ label }}</span>
-    <span class="RadioButtonComponent__subButton material-symbols-outlined"
+    <span
+      v-show="isVisibleInfo"
+      class="RadioButtonComponent__subButton material-symbols-outlined"
       >info</span
     >
   </button>
@@ -17,9 +19,26 @@
 
 <script>
 export default {
+  /**
+   * @module RadioButtonComponent
+   * @property isSelect — bool value
+   * @property label — Text
+   */
   name: "RadioButtonComponent",
-  props: ["isSelect", "label"],
+  props: {
+    isSelect: {
+      type: Boolean,
+    },
+    label: {
+      type: String,
+    },
+    isVisibleInfo: {
+      default: true,
+      type: Boolean,
+    },
+  },
   methods: {
+    /** emitEvent */
     emitEvent() {
       this.$emit("select");
     },
